@@ -1,290 +1,342 @@
 {
-  "extractors": [
-    {
-      "condition_type": "regex",
-      "condition_value": "^haproxy:",
-      "converters": [
-        {
-          "type": "date",
-          "config": {
-            "date_format": "dd/MMM/YYYY:HH:mm:ss.SSS"
-          }
+  "id" : null,
+  "name" : "graylog-contentpack-haproxy",
+  "description" : "graylog-contentpack-haproxy, which will create \r\n\r\nINPUTS:\r\nHAProxy HTTP logs\r\n(Raw/Plaintext UDP on 0.0.0.0 port 11002)\r\n\r\nDASHBOARD:\r\nHAProxy\r\n",
+  "category" : "HAProxy",
+  "inputs" : [ {
+    "title" : "HAProxy HTTP logs",
+    "configuration" : {
+      "override_source" : "",
+      "recv_buffer_size" : 262144,
+      "bind_address" : "0.0.0.0",
+      "port" : 11002
+    },
+    "type" : "org.graylog2.inputs.raw.udp.RawUDPInput",
+    "global" : false,
+    "extractors" : [ {
+      "title" : "Request Timestamp",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "haproxy:.+?\\[(.+?)\\]"
+      },
+      "converters" : [ {
+        "type" : "DATE",
+        "configuration" : {
+          "date_format" : "dd/MMM/YYYY:HH:mm:ss.SSS"
         }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "haproxy:.+?\\[(.+?)\\]"
+      } ],
+      "order" : 8,
+      "cursor_strategy" : "COPY",
+      "target_field" : "timestamp",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^haproxy:"
+    }, {
+      "title" : "Milliseconds spent waiting for the client to send a full HTTP request",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 1,
+        "split_by" : "/"
       },
-      "extractor_type": "regex",
-      "order": 8,
-      "source_field": "message",
-      "target_field": "timestamp",
-      "title": "Request Timestamp"
-    },
-    {
-      "condition_type": "none",
-      "condition_value": "haproxy:",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "index": 1,
-        "split_by": "/"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 1,
+      "cursor_strategy" : "COPY",
+      "target_field" : "tq",
+      "source_field" : "timings",
+      "condition_type" : "NONE",
+      "condition_value" : "haproxy:"
+    }, {
+      "title" : "Milliseconds spent waiting in queues",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 2,
+        "split_by" : "/"
       },
-      "extractor_type": "split_and_index",
-      "order": 1,
-      "source_field": "timings",
-      "target_field": "tq",
-      "title": "Milliseconds spent waiting for the client to send a full HTTP request"
-    },
-    {
-      "condition_type": "none",
-      "condition_value": "",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "index": 2,
-        "split_by": "/"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 2,
+      "cursor_strategy" : "COPY",
+      "target_field" : "tw",
+      "source_field" : "timings",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Milliseconds spent waiting for the connection to establish to the final server",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 3,
+        "split_by" : "/"
       },
-      "extractor_type": "split_and_index",
-      "order": 2,
-      "source_field": "timings",
-      "target_field": "tw",
-      "title": "Milliseconds spent waiting in queues"
-    },
-    {
-      "condition_type": "none",
-      "condition_value": "",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "index": 3,
-        "split_by": "/"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 3,
+      "cursor_strategy" : "COPY",
+      "target_field" : "tc",
+      "source_field" : "timings",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Milliseconds spent waiting for the server to send a full HTTP response",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 4,
+        "split_by" : "/"
       },
-      "extractor_type": "split_and_index",
-      "order": 3,
-      "source_field": "timings",
-      "target_field": "tc",
-      "title": "Milliseconds spent waiting for the connection to establish to the final server"
-    },
-    {
-      "condition_type": "none",
-      "condition_value": "",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "index": 4,
-        "split_by": "/"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 4,
+      "cursor_strategy" : "COPY",
+      "target_field" : "tr",
+      "source_field" : "timings",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Milliseconds elapsed between the accept and the last close",
+      "type" : "SPLIT_AND_INDEX",
+      "configuration" : {
+        "index" : 5,
+        "split_by" : "/"
       },
-      "extractor_type": "split_and_index",
-      "order": 4,
-      "source_field": "timings",
-      "target_field": "tr",
-      "title": "Milliseconds spent waiting for the server to send a full HTTP response"
-    },
-    {
-      "condition_type": "none",
-      "condition_value": "",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "index": 5,
-        "split_by": "/"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 5,
+      "cursor_strategy" : "COPY",
+      "target_field" : "tt",
+      "source_field" : "timings",
+      "condition_type" : "NONE",
+      "condition_value" : ""
+    }, {
+      "title" : "Remote Address",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy\\[\\d+\\]\\:\\s([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\\:"
       },
-      "extractor_type": "split_and_index",
-      "order": 5,
-      "source_field": "timings",
-      "target_field": "tt",
-      "title": "Milliseconds elapsed between the accept and the last close"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy\\[\\d+\\]\\:\\s([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\\:"
+      "converters" : [ ],
+      "order" : 6,
+      "cursor_strategy" : "COPY",
+      "target_field" : "remote_addr",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy"
+    }, {
+      "title" : "HTTP Version",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?HTTP/(\\S+)\""
       },
-      "extractor_type": "regex",
-      "order": 6,
-      "source_field": "message",
-      "target_field": "remote_addr",
-      "title": "Remote Address"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?HTTP/(\\S+)\""
+      "converters" : [ ],
+      "order" : 7,
+      "cursor_strategy" : "COPY",
+      "target_field" : "http_version",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Timings",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\].+?\\S+/\\S+\\s(\\S+)"
       },
-      "extractor_type": "regex",
-      "order": 7,
-      "source_field": "message",
-      "target_field": "http_version",
-      "title": "HTTP Version"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\].+?\\S+/\\S+\\s(\\S+)"
+      "converters" : [ ],
+      "order" : 0,
+      "cursor_strategy" : "COPY",
+      "target_field" : "timings",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Frontend",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\]\\s(\\S+)"
       },
-      "extractor_type": "regex",
-      "order": 0,
-      "source_field": "message",
-      "target_field": "timings",
-      "title": "Timings"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\]\\s(\\S+)"
+      "converters" : [ ],
+      "order" : 9,
+      "cursor_strategy" : "COPY",
+      "target_field" : "frontend",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Backend",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\].+?(\\S+)/"
       },
-      "extractor_type": "regex",
-      "order": 9,
-      "source_field": "message",
-      "target_field": "frontend",
-      "title": "Frontend"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\].+?(\\S+)/"
+      "converters" : [ ],
+      "order" : 10,
+      "cursor_strategy" : "COPY",
+      "target_field" : "backend",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Server",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\].+?/(\\S+)"
       },
-      "extractor_type": "regex",
-      "order": 10,
-      "source_field": "message",
-      "target_field": "backend",
-      "title": "Backend"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\].+?/(\\S+)"
+      "converters" : [ ],
+      "order" : 11,
+      "cursor_strategy" : "COPY",
+      "target_field" : "server",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Response Status",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\].+?\\s\\S+\\s\\S+\\s(\\d+)"
       },
-      "extractor_type": "regex",
-      "order": 11,
-      "source_field": "message",
-      "target_field": "server",
-      "title": "Server"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\].+?\\s\\S+\\s\\S+\\s(\\d+)"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 12,
+      "cursor_strategy" : "COPY",
+      "target_field" : "response_status",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Response Bytes",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\\[.+?\\].+?\\s\\S+\\s\\S+\\s\\d+\\s(\\d+)"
       },
-      "extractor_type": "regex",
-      "order": 12,
-      "source_field": "message",
-      "target_field": "response_status",
-      "title": "Response Status"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [
-        {
-          "type": "numeric",
-          "config": {}
-        }
-      ],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\\[.+?\\].+?\\s\\S+\\s\\S+\\s\\d+\\s(\\d+)"
+      "converters" : [ {
+        "type" : "NUMERIC",
+        "configuration" : { }
+      } ],
+      "order" : 13,
+      "cursor_strategy" : "COPY",
+      "target_field" : "response_bytes",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Request Verb",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\"(\\w+)\\s"
       },
-      "extractor_type": "regex",
-      "order": 13,
-      "source_field": "message",
-      "target_field": "response_bytes",
-      "title": "Response Bytes"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\"(\\w+)\\s"
+      "converters" : [ ],
+      "order" : 14,
+      "cursor_strategy" : "COPY",
+      "target_field" : "request_verb",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Request Path",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+?\"\\w+\\s(\\S+)"
       },
-      "extractor_type": "regex",
-      "order": 14,
-      "source_field": "message",
-      "target_field": "request_verb",
-      "title": "Request Verb"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+?\"\\w+\\s(\\S+)"
+      "converters" : [ ],
+      "order" : 15,
+      "cursor_strategy" : "COPY",
+      "target_field" : "request_path",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    }, {
+      "title" : "Message",
+      "type" : "REGEX",
+      "configuration" : {
+        "regex_value" : "^.*haproxy.+\"(.+)\""
       },
-      "extractor_type": "regex",
-      "order": 15,
-      "source_field": "message",
-      "target_field": "request_path",
-      "title": "Request Path"
-    },
-    {
-      "condition_type": "regex",
-      "condition_value": "^.*haproxy\\[\\d+\\]",
-      "converters": [],
-      "cursor_strategy": "copy",
-      "extractor_config": {
-        "regex_value": "^.*haproxy.+\"(.+)\""
+      "converters" : [ ],
+      "order" : 16,
+      "cursor_strategy" : "COPY",
+      "target_field" : "message",
+      "source_field" : "message",
+      "condition_type" : "REGEX",
+      "condition_value" : "^.*haproxy\\[\\d+\\]"
+    } ],
+    "static_fields" : { }
+  } ],
+  "streams" : [ ],
+  "outputs" : [ ],
+  "dashboards" : [ {
+    "title" : "HAProxy",
+    "description" : "HAProxy",
+    "dashboard_widgets" : [ {
+      "description" : "Top Request_path",
+      "type" : "QUICKVALUES",
+      "configuration" : {
+        "timerange" : {
+          "type" : "relative",
+          "range" : 86400
+        },
+        "field" : "request_path",
+        "show_pie_chart" : false,
+        "query" : "frontend:helpchat_nginx",
+        "show_data_table" : true
       },
-      "extractor_type": "regex",
-      "order": 16,
-      "source_field": "message",
-      "target_field": "message",
-      "title": "Message"
-    }
-  ],
-  "version": "1.1.6 (2e264c2)"
+      "col" : 1,
+      "row" : 5,
+      "cache_time" : 10
+    }, {
+      "description" : "Request_path",
+      "type" : "QUICKVALUES",
+      "configuration" : {
+        "timerange" : {
+          "type" : "relative",
+          "range" : 86400
+        },
+        "field" : "response_status",
+        "show_pie_chart" : false,
+        "query" : "frontend:helpchat_nginx",
+        "show_data_table" : true
+      },
+      "col" : 1,
+      "row" : 3,
+      "cache_time" : 10
+    }, {
+      "description" : "HAProxy request per minute",
+      "type" : "SEARCH_RESULT_CHART",
+      "configuration" : {
+        "interval" : "minute",
+        "timerange" : {
+          "type" : "relative",
+          "range" : 86400
+        },
+        "query" : "frontend:helpchat_nginx"
+      },
+      "col" : 1,
+      "row" : 1,
+      "cache_time" : 10
+    }, {
+      "description" : "Total Time on HAProxy mean (ms)",
+      "type" : "FIELD_CHART",
+      "configuration" : {
+        "valuetype" : "mean",
+        "timerange" : {
+          "type" : "relative",
+          "range" : 86400
+        },
+        "renderer" : "bar",
+        "interpolation" : "linear",
+        "field" : "tt",
+        "query" : "frontend:helpchat_nginx",
+        "interval" : "minute"
+      },
+      "col" : 1,
+      "row" : 2,
+      "cache_time" : 10
+    } ]
+  } ]
 }
